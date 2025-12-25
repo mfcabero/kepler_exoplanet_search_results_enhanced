@@ -13,6 +13,7 @@ OUT_HZ_BIN1 = "../datasets/kepler_hz_bin1.csv"
 OUT_HZ_BIN1_HIST = "../datasets/kepler_hz_bin1_histogram.csv"
 OUT_KOI_DISPOSITION_HZ = "../datasets/koi_disposition_by_HZ_bin.csv"
 OUT_KOI_DISPOSITION_PIVOT = "../datasets/koi_disposition_hz_pivot.csv"
+OUT_KOI_DISPOSITION_PCT = "../datasets/koi_disposition_hz_percentage.csv"
 
 # Load original dataset
 df = pd.read_csv(SRC_PATH)
@@ -86,3 +87,22 @@ df_koi_pivot = df_koi_pivot.rename(columns={
 
 df_koi_pivot.to_csv(OUT_KOI_DISPOSITION_PIVOT, index=False)
 print(f"Pivoted koi_disposition dataset saved to {OUT_KOI_DISPOSITION_PIVOT}")
+
+# Copy pivoted data
+df_pct = df_koi_pivot.copy()
+
+# Compute row-wise percentages
+row_sum = df_pct[["Outside_HZ", "Inside_HZ"]].sum(axis=1)
+
+df_pct["Outside_HZ_pct"] = (df_pct["Outside_HZ"] / row_sum * 100).round(1)
+df_pct["Inside_HZ_pct"] = (df_pct["Inside_HZ"] / row_sum * 100).round(1)
+
+# Keep only percentage columns
+df_pct = df_pct[[
+    "koi_disposition",
+    "Outside_HZ_pct",
+    "Inside_HZ_pct"
+]]
+
+df_pct.to_csv(OUT_KOI_DISPOSITION_PCT, index=False)
+print(f"Percentage-normalized dataset saved to {OUT_KOI_DISPOSITION_PCT}")
