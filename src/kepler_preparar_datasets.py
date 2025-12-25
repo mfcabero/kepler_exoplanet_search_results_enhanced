@@ -27,30 +27,30 @@ hz_bin_count.columns = ["HZ_bin", "count"]
 hz_bin_count.to_csv(OUT_HZ_BIN_COUNT, index=False)
 print(f"HZ_bin count saved to {OUT_HZ_BIN_COUNT}")
 
-
 # Filter dataset for HZ_bin = 1
 df_hz_bin1 = df[df["HZ_bin"] == 1]
 print(f"Filtered {len(df_hz_bin1)} entries with HZ_bin = 1")
 df_hz_bin1.to_csv(OUT_HZ_BIN1, index=False)
 
-# Prepare histogram data
+# Prepare histogram data (convert to Celcius)
 df_hz_bin1_hist = df_hz_bin1.dropna(subset=["koi_teq"])
-values = df_hz_bin1_hist["koi_teq"].to_numpy()
-bin_edges = np.histogram_bin_edges(values, bins="fd")
+values_C = df_hz_bin1_hist["koi_teq"] - 273.15
+# Compute optimal bin edges in C
+bin_edges_C = np.histogram_bin_edges(values_C, bins="fd")
 
 # Compute bins and counts
-counts, edges = np.histogram(values, bins=bin_edges)
-bin_left = edges[:-1].round(1)
-bin_right = edges[1:].round(1)
-bin_center = ((bin_left + bin_right) / 2).round(1)
+counts_C, edges_C = np.histogram(values_C, bins=bin_edges_C)
+bin_left_C = edges_C[:-1].round(1)
+bin_right_C = edges_C[1:].round(1)
+bin_center_C = ((bin_left_C + bin_right_C) / 2).round(1)
 
-# Create binned dataset
-df_histogram = pd.DataFrame({
-    "temp_bin_left": bin_left,
-    "temp_bin_right": bin_right,
-    "temp_bin_center": bin_center,
-    "frequency": counts
+# Create binned dataset in C
+df_histogram_C = pd.DataFrame({
+    "temp_C_bin_left": bin_left_C,
+    "temp_C_bin_right": bin_right_C,
+    "temp_C_bin_center": bin_center_C,
+    "frequency": counts_C
 })
 
-df_histogram.to_csv(OUT_HZ_BIN1_HIST, index=False)
-print(f"Binned data saved: {len(df_histogram)} bins")
+df_histogram_C.to_csv(OUT_HZ_BIN1_HIST, index=False)
+print(f"Binned Celsius data saved: {len(df_histogram_C)} bins")
