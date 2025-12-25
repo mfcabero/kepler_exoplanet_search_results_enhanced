@@ -11,6 +11,7 @@ SRC_PATH = "../datasets/kepler_exoplanet_search_results_enhanced.csv"
 OUT_HZ_BIN_COUNT = "../datasets/HZ_bin_count.csv"
 OUT_HZ_BIN1 = "../datasets/kepler_hz_bin1.csv"
 OUT_HZ_BIN1_HIST = "../datasets/kepler_hz_bin1_histogram.csv"
+OUT_KOI_DISPOSITION_HZ = "../datasets/koi_disposition_by_HZ_bin.csv"
 
 # Load original dataset
 df = pd.read_csv(SRC_PATH)
@@ -54,3 +55,15 @@ df_histogram_C = pd.DataFrame({
 
 df_histogram_C.to_csv(OUT_HZ_BIN1_HIST, index=False)
 print(f"Binned Celsius data saved: {len(df_histogram_C)} bins")
+
+# koi_disposition × HZ_bin 
+df_koi_hz = (
+    df
+    .groupby(["koi_disposition", "HZ_bin"])
+    .size()
+    .reset_index(name="count")
+    .sort_values(["koi_disposition", "HZ_bin"])
+)
+
+df_koi_hz.to_csv(OUT_KOI_DISPOSITION_HZ, index=False)
+print(f"koi_disposition by HZ_bin saved to {OUT_KOI_DISPOSITION_HZ}")
