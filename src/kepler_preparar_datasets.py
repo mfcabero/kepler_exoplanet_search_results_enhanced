@@ -12,6 +12,7 @@ OUT_HZ_BIN_COUNT = "../datasets/HZ_bin_count.csv"
 OUT_HZ_BIN1 = "../datasets/kepler_hz_bin1.csv"
 OUT_HZ_BIN1_HIST = "../datasets/kepler_hz_bin1_histogram.csv"
 OUT_KOI_DISPOSITION_HZ = "../datasets/koi_disposition_by_HZ_bin.csv"
+OUT_KOI_DISPOSITION_PIVOT = "../datasets/koi_disposition_hz_pivot.csv"
 
 # Load original dataset
 df = pd.read_csv(SRC_PATH)
@@ -67,3 +68,21 @@ df_koi_hz = (
 
 df_koi_hz.to_csv(OUT_KOI_DISPOSITION_HZ, index=False)
 print(f"koi_disposition by HZ_bin saved to {OUT_KOI_DISPOSITION_HZ}")
+
+# Group and pivot
+df_koi_pivot = (
+    df
+    .groupby(["koi_disposition", "HZ_bin"])
+    .size()
+    .unstack(fill_value=0)
+    .reset_index()
+)
+
+# Rename columns
+df_koi_pivot = df_koi_pivot.rename(columns={
+    0: "Outside_HZ",
+    1: "Inside_HZ"
+})
+
+df_koi_pivot.to_csv(OUT_KOI_DISPOSITION_PIVOT, index=False)
+print(f"Pivoted koi_disposition dataset saved to {OUT_KOI_DISPOSITION_PIVOT}")
